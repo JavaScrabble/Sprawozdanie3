@@ -1,0 +1,23 @@
+Do której warstwy należą aplikacje internetowe?|A) do żadnej|B) do aplikacji|C) do sesji|D) do prezentacji|A
+Do której warstwy należy hub?|A) fizycznej|B) łącza danych|C) internetowej|D) transportowej|A
+Które wartswy modelu OSI stanowią jedną warstwę modelu TCP/IP?|A) aplikacji|B) prezentacji|C) sesji|D) transportowa|ABC
+Do której warstwy należy switch?|A) fizycznej|B) łącza danych|C) internetowej|D) transportowej|B
+Do której warstwy należy router?|A) fizycznej|B) łącza danych|C) internetowej|D) transportowej|C
+W której warstwie podstawową jednostką jest segment?|A) fizycznej|B) łącza danych|C) internetowej|D) transportowej|D
+W której warstwie podstawową jednostką jest pakiet?|A) fizycznej|B) łącza danych|C) internetowej|D) transportowej|C
+W której warstwie podstawową jednostką jest ramka?|A) fizycznej|B) łącza danych|C) internetowej|D) transportowej|B
+W której warstwie adresem jest MAC?|A) fizycznej|B) łącza danych|C) internetowej|D) transportowej|B
+W której warstwie adresem jest IP?|A) fizycznej|B) łącza danych|C) internetowej|D) transportowej|C
+W której warstwie adresem jest port?|A) fizycznej|B) łącza danych|C) internetowej|D) transportowej|D
+Jakie urządzenie znajduje się w warstwie fizycznej?|A) hub|B) switch|C) router|D) żadne z wymienionych|A
+Jakie urządzenie znajduje się w warstwie łącza danych?|A) hub|B) switch|C) router|D) żadne z wymienionych|B
+Jakie urządzenie znajduje się w warstwie internetowej?|A) hub|B) switch|C) router|D) żadne z wymienionych|C
+Jakie urządzenie znajduje się w warstwie transportowej?|A) hub|B) switch|C) router|D) żadne z wymienionych|D
+Jaka jest podstawowa jednostka w warstwie fizycznej?|A) ramka|B) pakiet|C) segment|D) żadna z wymienionych|D
+Jaka jest podstawowa jednostka w warstwie łącza danych?|A) ramka|B) pakiet|C) segment|D) żadna z wymienionych|A
+Jaka jest podstawowa jednostka w warstwie internetowej?|A) ramka|B) pakiet|C) segment|D) żadna z wymienionych|B
+Jaka jest podstawowa jednostka w warstwie transportowej?|A) ramka|B) pakiet|C) segment|D) żadna z wymienionych|C
+Co jest adresem w warstwie fizycznej?|A) MAC|B) IP|C) port|D) żadne z wymienionych|D
+Co jest adresem w warstwie łącza danych?|A) MAC|B) IP|C) port|D) żadne z wymienionych|A
+Co jest adresem w warstwie internetowej?|A) MAC|B) IP|C) port|D) żadne z wymienionych|B
+Co jest adresem w warstwie transportowej?|A) MAC|B) IP|C) port|D) żadne z wymienionych|C
