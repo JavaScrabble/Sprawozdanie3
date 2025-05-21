@@ -1,7 +1,6 @@
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -84,11 +83,6 @@ class ServerTCPThread extends Thread {
         // pobierz strumienie we/wy
         try (BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
              BufferedWriter out = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()))) {
-            // Poinformuj klienta o limicie czasu
-            out.write("Masz " + ServerTCP.QUESTION_TIMEOUT + " sekund by odpowiedzieć na każde pytanie!\n");
-
-            boolean ignoreNextAnswer = false; // zmienna do ignorowania nastepnej odpowiedzi, jesli przed tym wystapil timeout
-
             // dla kazdego pytania
             for (int i = 0; i < questions.size(); i++) {
                 Question q = questions.get(i);
@@ -98,25 +92,13 @@ class ServerTCPThread extends Thread {
                 out.newLine();
                 out.flush();
 
-                // Czekaj na odpowiedź z limitem czasu
-                socket.setSoTimeout(ServerTCP.QUESTION_TIMEOUT * 1000);
-
                 // pobierz odpowiedź
                 String answer;
-                try {
-                    if (ignoreNextAnswer)
-                        in.readLine();
-                    answer = in.readLine();
-                    if (answer == null || answer.isEmpty()) {
-                        answer = "BRAK";
-                    }
-                    ignoreNextAnswer = false;
-                } catch (SocketTimeoutException e) {
-                    System.out.println("Timeout klienta: " + clientID + " przy pytaniu " + (i + 1));
-                    answer = "BRAK";
-                    ignoreNextAnswer = true;
-                }
 
+                answer = in.readLine();
+                if (answer == null || answer.isEmpty()) {
+                    answer = "BRAK";
+                }
                 clientAnswers.add(answer.toUpperCase());
 
                 // sprawdz poprawnosc odpowiedzi

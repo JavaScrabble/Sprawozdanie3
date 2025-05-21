@@ -11,10 +11,6 @@ public class ClientTCP {
             BufferedWriter out = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
             Scanner scanner = new Scanner(System.in)) {
 
-            // odczytaj wstepne informacje i wyswietlij je
-            String line = in.readLine();
-            System.out.println(line);
-
             // główna pętla
             while (true) {
                 // odczytaj pytanie z odpowiedziami
@@ -34,24 +30,46 @@ public class ClientTCP {
                     System.out.println(parts[i]);
                 }
 
-                // odczytaj odpowiedzi klienta
-                System.out.print("Twoje odpowiedzi (A/B/C/D bez spacji, np. AD): ");
-                String answer = scanner.nextLine().trim().toUpperCase();
+                try {
+                    String answer = readInputWithTimeout(30);
 
-                // sprawdz poprawnosc podanych odpowiedzi
-                if (!answer.matches("[A-D]+")) {
-                    answer = "BRAK";
+                    // sprawdz poprawnosc podanych odpowiedzi
+                    if (!answer.matches("[A-D]+")) {
+                        answer = "BRAK";
+                    }
+
+                    // wyślij odpowiedzi do serwera
+                    out.write(answer);
+                    out.newLine();
+                    out.flush();
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
                 }
-
-                // wyślij odpowiedzi do serwera
-                out.write(answer);
-                out.newLine();
-                out.flush();
             }
 
         } catch (IOException e) {
             System.err.println("Błąd klienta: " + e.getMessage());
         }
+    }
+
+    private static String readInputWithTimeout(int timeoutSeconds) {
+        BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+        long endTime = System.currentTimeMillis() + timeoutSeconds * 1000L;
+
+        System.out.print("Twoje odpowiedzi (A/B/C/D bez spacji, np. AD): ");
+        try {
+            while (System.currentTimeMillis() < endTime) {
+                if (reader.ready()) {
+                    return reader.readLine().trim().toUpperCase();
+                }
+                Thread.sleep(100);
+            }
+        } catch (IOException | InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        System.out.println("\nCzas minął. Brak odpowiedzi.");
+        return "BRAK";
     }
 }
 
