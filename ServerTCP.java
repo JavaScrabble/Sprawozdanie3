@@ -11,13 +11,14 @@ public class ServerTCP {
     private static final int PORT = 20;
     private static final int MAX_CLIENTS = 250;
 
-    private static final List<Question> questions = new ArrayList<>();
+    private static List<Question> questions;
 
     public static void main(String args[]) {
         // zaladuj pytania
-        loadQuestions("bazaPytan.txt");
+        JDBCQuestionProvider provider = new JDBCQuestionProvider("jdbc:mysql://localhost:3306", "root", "");
+        questions = provider.getQuestions();
 
-        ExecutorService executor = Executors.newFixedThreadPool(MAX_CLIENTS);;
+        ExecutorService executor = Executors.newFixedThreadPool(MAX_CLIENTS);
         try(ServerSocket serverSocket = new ServerSocket(PORT)) {
             while (true) {
             // czekamy na zgłoszenie klienta ...
@@ -27,24 +28,6 @@ public class ServerTCP {
         //zamknięcie strumieni i połączenia
         } catch (Exception e) {
             System.err.println(e);
-        }
-    }
-
-
-    private static void loadQuestions(String fileName) {
-        // otworz plik do odczytu
-        try (BufferedReader reader = new BufferedReader(new FileReader(fileName))) {
-            String line;
-            // wczytaj linie
-            while ((line = reader.readLine()) != null) {
-                String[] parts = line.split("\\|"); // podziel na czesci
-                // na podstawie linii dodaj nowe pytanie do listy
-                if (parts.length == 6) {
-                    questions.add(new Question(parts[0], Arrays.copyOfRange(parts, 1, 5), parts[5].trim()));
-                }
-            }
-        } catch (IOException e) {
-            System.err.println("Błąd wczytywania pytań: " + e.getMessage());
         }
     }
 }
