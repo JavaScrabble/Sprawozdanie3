@@ -5,8 +5,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class FileQuestionLoader {
-    public static List<Question> loadQuestions(String fileName) {
+class FileQuestionLoader {
+    static List<Question> loadQuestions(String fileName) {
         // otworz plik do odczytu
         List<Question> questions = new ArrayList<>();
         try (BufferedReader reader = new BufferedReader(new FileReader(fileName))) {

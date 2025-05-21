@@ -1,28 +1,34 @@
 import java.io.File;
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
-public class JDBCQuestionProvider {
+class JDBCQuestionProvider {
     private Connection connection;
 
     JDBCQuestionProvider(String dbUrl, String dbUser, String dbPass) {
         try {
             connection = DriverManager.getConnection(dbUrl, dbUser, dbPass);
 
-            Statement stmt = connection.createStatement();
-            stmt.addBatch("CREATE DATABASE IF NOT EXISTS quiz;");
-            stmt.addBatch("USE quiz;");
-            stmt.addBatch("CREATE TABLE IF NOT EXISTS question(id int(3) primary key, text varchar(200), correct varchar(4));");
-            stmt.addBatch("CREATE TABLE IF NOT EXISTS question_answer(answer_id int(3) primary key, question_id int(3), text varchar(200), foreign key(question_id) references question(id));");
-            stmt.executeBatch();
+            Statement init = connection.createStatement();
+            init.addBatch("CREATE DATABASE IF NOT EXISTS quiz;");
+            init.addBatch("USE quiz;");
+            init.addBatch("CREATE TABLE IF NOT EXISTS question(id int(3) primary key, text varchar(200), correct varchar(4));");
+            init.addBatch("CREATE TABLE IF NOT EXISTS question_answer(answer_id int(3) primary key, question_id int(3), text varchar(200), foreign key(question_id) references question(id));");
+            init.executeBatch();
+            init.close();
 
-            ResultSet set = connection.createStatement().executeQuery("SELECT COUNT(*) FROM question");
+            ResultSet checkIfExists = connection.createStatement().executeQuery("SELECT 1 FROM question limit 1");
 
-            if(set.next() && set.getInt(1) != 0) {
+            if(checkIfExists.next()) {
+                System.out.println("Znaleziono pytania w bazie danych!");
                 return;
             }
 
+            checkIfExists.getStatement().close();
+
+            System.out.println("Wypełnianie bazy danych pytaniami z pliku");
             List<Question> questions = FileQuestionLoader.loadQuestions("bazaPytan.txt");
 
             int questionId = 1;
@@ -34,19 +40,26 @@ public class JDBCQuestionProvider {
                 questionInsert.setString(2, q.text);
                 questionInsert.setString(3, q.correct);
 
-                questionInsert.executeUpdate();
+                questionInsert.addBatch();
 
                 for(String ans : q.options){
                     answerInsert.setInt(1, answerId);
                     answerInsert.setInt(2, questionId);
                     answerInsert.setString(3, ans);
 
-                    answerInsert.executeUpdate();
+                    answerInsert.addBatch();
                     answerId++;
                 }
 
                 questionId++;
             }
+            questionInsert.executeBatch();
+            answerInsert.executeBatch();
+
+            questionInsert.close();
+            answerInsert.close();
+
+            System.out.printf("Do bazy danych zapisano %d pytań%n", questionId);
         }
         catch (SQLException e) {
             e.printStackTrace();
@@ -54,19 +67,20 @@ public class JDBCQuestionProvider {
         }
     }
 
-
-    public List<Question> getQuestions(){
+    List<Question> getQuestions(){
         try {
             List<Question> result = new ArrayList<>();
+            PreparedStatement answersStatement = connection.prepareStatement("SELECT * FROM question_answer WHERE question_id = ?");
             ResultSet questions = connection.createStatement().executeQuery("SELECT * FROM question");
-            ResultSet answers = null;
+            ResultSet answers;
 
             while(questions.next()) {
                 int questionId = questions.getInt("id");
                 String text = questions.getString("text");
                 String correct = questions.getString("correct");
 
-                answers = connection.createStatement().executeQuery("SELECT * FROM question_answer WHERE question_id = " + questionId);
+                answersStatement.setInt(1, questionId - 1);
+                answers = answersStatement.executeQuery();
 
                 String[] qa = new String[4];
                 for(int i = 0; i < 4; i++) {
@@ -77,15 +91,15 @@ public class JDBCQuestionProvider {
                 result.add(new Question(text, qa, correct));
             }
 
-            answers.close();
-            questions.close();
+            answersStatement.close();
+            questions.getStatement().close();
             return result;
         }
         catch (SQLException e) {
             e.printStackTrace();
             System.exit(1);
         }
-        return null;
+        return Collections.emptyList();
     }
 
 }
