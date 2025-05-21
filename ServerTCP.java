@@ -10,7 +10,6 @@ import java.util.concurrent.Executors;
 public class ServerTCP {
     private static final int PORT = 20;
     private static final int MAX_CLIENTS = 250;
-    public static final int QUESTION_TIMEOUT = 30;
 
     private static final List<Question> questions = new ArrayList<>();
 
