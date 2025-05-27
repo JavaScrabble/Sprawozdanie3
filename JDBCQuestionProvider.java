@@ -16,6 +16,9 @@ class JDBCQuestionProvider {
             init.addBatch("USE quiz;");
             init.addBatch("CREATE TABLE IF NOT EXISTS question(id int(3) primary key, text varchar(200), correct varchar(4));");
             init.addBatch("CREATE TABLE IF NOT EXISTS question_answer(answer_id int(3) primary key, question_id int(3), text varchar(200), foreign key(question_id) references question(id));");
+            init.addBatch("CREATE TABLE IF NOT EXISTS result (id INT AUTO_INCREMENT PRIMARY KEY, client_id VARCHAR(100), score INT, total INT);");
+            init.addBatch("CREATE TABLE IF NOT EXISTS answer_log (id INT AUTO_INCREMENT PRIMARY KEY, client_id VARCHAR(100), question_number INT, answer VARCHAR(10));");
+
             init.executeBatch();
             init.close();
 
@@ -79,7 +82,7 @@ class JDBCQuestionProvider {
                 String text = questions.getString("text");
                 String correct = questions.getString("correct");
 
-                answersStatement.setInt(1, questionId - 1);
+                answersStatement.setInt(1, questionId );
                 answers = answersStatement.executeQuery();
 
                 String[] qa = new String[4];
