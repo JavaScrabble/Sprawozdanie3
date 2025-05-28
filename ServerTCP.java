@@ -1,11 +1,16 @@
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+
 
 public class ServerTCP {
     private static final int PORT = 20;
@@ -110,28 +115,36 @@ class ServerTCPThread extends Thread {
     }
 
     private synchronized void saveAnswers(String clientID, List<String> answers) {
-        // Otworz plik bazy odpowiedzi do zapisu w trybie append
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter("bazaOdpowiedzi.txt", true))) {
-            // zapisz odpowiedzi
+        try (Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/quiz", "root", "")) {
+            PreparedStatement ps = conn.prepareStatement(
+                    "INSERT INTO answer_log (client_id, question_number, answer) VALUES (?, ?, ?)");
             for (int i = 0; i < answers.size(); i++) {
-                writer.write(clientID + "|Pytanie " + (i + 1) + "|" + answers.get(i));
-                writer.newLine();
+                ps.setString(1, clientID);
+                ps.setInt(2, i + 1);
+                ps.setString(3, answers.get(i));
+                ps.addBatch();
             }
-        } catch (IOException e) {
-            System.err.println("Błąd zapisu odpowiedzi: " + e.getMessage());
+            ps.executeBatch();
+            ps.close();
+        } catch (SQLException e) {
+            System.err.println("Błąd zapisu odpowiedzi do bazy: " + e.getMessage());
         }
     }
 
     private synchronized void saveResult(String clientID, int score, int total) {
-        // Otworz plik bazy wyników do zapisu w trybie append
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter("wyniki.txt", true))) {
-            // zapisz wynik
-            writer.write(clientID + "|Wynik:" + score + "/" + total);
-            writer.newLine();
-        } catch (IOException e) {
-            System.err.println("Błąd zapisu wyniku: " + e.getMessage());
+        try (Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/quiz", "root", "")) {
+            PreparedStatement ps = conn.prepareStatement(
+                    "INSERT INTO result (client_id, score, total) VALUES (?, ?, ?)");
+            ps.setString(1, clientID);
+            ps.setInt(2, score);
+            ps.setInt(3, total);
+            ps.executeUpdate();
+            ps.close();
+        } catch (SQLException e) {
+            System.err.println("Błąd zapisu wyniku do bazy: " + e.getMessage());
         }
     }
+
 
     // Porównanie odpowiedzi
     private boolean isCorrect(String given, String correct) {
