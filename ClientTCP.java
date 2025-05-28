@@ -4,12 +4,32 @@ import java.util.Scanner;
 
 public class ClientTCP {
     public static void main(String[] args) {
-        if(args.length != 2) {
-            System.out.println("Musisz podać adres i port serwera!");
-            System.exit(1);
+        Scanner scanner = new Scanner(System.in);
+
+        String address;
+        int port;
+
+        if (args.length == 2) {
+            address = args[0];
+            port = Integer.parseInt(args[1]);
+        } else {
+            System.out.print("Podaj adres serwera: ");
+            address = scanner.nextLine();
+
+            System.out.print("Podaj port serwera: ");
+            while (true) {
+                try {
+                    port = Integer.parseInt(scanner.nextLine());
+                    break;
+                } catch (NumberFormatException e) {
+                    System.out.print("Niepoprawny port. Podaj liczbę całkowitą: ");
+                }
+            }
         }
 
-        try(Socket socket = new Socket(args[0], Integer.parseInt(args[1]));
+        System.out.println("Łączenie z serwerem " + address + " na porcie " + port + "...");
+
+        try(Socket socket = new Socket(address, port);
             BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             BufferedWriter out = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()))) {
 
